@@ -28,6 +28,7 @@
 ## Зависимости
 
 ### Сервер
+- Компилятор C++ с поддержкой стандарта C++20 (например, GCC 10+, Clang 11+, MSVC 2019+)
 - [Boost](https://www.boost.org/) (через [vcpkg](https://github.com/microsoft/vcpkg)):
   - `boost-system`
   - `boost-asio`
@@ -81,7 +82,7 @@ cmake --build . --config Debug
 
 ```sh
 cd build
-cmake --build . --config Debug --target RUN_TESTS
+ctest -C Debug --output-on-failure
 ```
 
 Тесты покрывают:
