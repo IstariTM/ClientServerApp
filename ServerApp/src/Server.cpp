@@ -19,82 +19,84 @@ using boost::asio::buffer;
 using boost::asio::ip::tcp;
 namespace this_coro = boost::asio::this_coro;
 
-/**
- * @brief Compresses a given string using the zlib deflate algorithm.
- *
- * This function takes an input string and compresses it using the zlib library
- * with the best compression level. The compressed data is returned as a std::string.
- *
- * @param str The input string to be compressed.
- * @return std::string The compressed representation of the input string.
- *
- * @throws std::runtime_error If compression initialization or processing fails.
- */
-static std::string compress_string(const std::string& str) {
-    z_stream zs{};
-    if (deflateInit(&zs, Z_BEST_COMPRESSION) != Z_OK)
-        throw std::runtime_error("deflateInit failed");
+namespace {
+    /**
+     * @brief Compresses a given string using the zlib deflate algorithm.
+     *
+     * This function takes an input string and compresses it using the zlib library
+     * with the best compression level. The compressed data is returned as a std::string.
+     *
+     * @param str The input string to be compressed.
+     * @return std::string The compressed representation of the input string.
+     *
+     * @throws std::runtime_error If compression initialization or processing fails.
+     */
+    std::string compress_string(const std::string& str) {
+        z_stream zs{};
+        if (deflateInit(&zs, Z_BEST_COMPRESSION) != Z_OK)
+            throw std::runtime_error("deflateInit failed");
 
-    zs.next_in = reinterpret_cast<Bytef*>(const_cast<char*>(str.data()));
-    zs.avail_in = static_cast<uInt>(str.size());
+        zs.next_in = reinterpret_cast<Bytef*>(const_cast<char*>(str.data()));
+        zs.avail_in = static_cast<uInt>(str.size());
 
-    std::string outstring;
-    std::vector<char> outbuffer(32768);
+        std::string outstring;
+        std::vector<char> outbuffer(32768);
 
-    int ret;
-    do {
-        zs.next_out = reinterpret_cast<Bytef*>(outbuffer.data());
-        zs.avail_out = static_cast<uInt>(outbuffer.size());
+        int ret;
+        do {
+            zs.next_out = reinterpret_cast<Bytef*>(outbuffer.data());
+            zs.avail_out = static_cast<uInt>(outbuffer.size());
 
-        ret = deflate(&zs, Z_FINISH);
-        if (ret == Z_STREAM_ERROR) {
-            deflateEnd(&zs);
-            throw std::runtime_error("deflate failed");
-        }
-        outstring.append(outbuffer.data(), outbuffer.size() - zs.avail_out);
-    } while (ret != Z_STREAM_END);
+            ret = deflate(&zs, Z_FINISH);
+            if (ret == Z_STREAM_ERROR) {
+                deflateEnd(&zs);
+                throw std::runtime_error("deflate failed");
+            }
+            outstring.append(outbuffer.data(), outbuffer.size() - zs.avail_out);
+        } while (ret != Z_STREAM_END);
 
-    deflateEnd(&zs);
-    return outstring;
-}
+        deflateEnd(&zs);
+        return outstring;
+    }
 
-/**
- * @brief Decompresses a string using the zlib inflate algorithm.
- *
- * This function takes a compressed input string (in zlib format) and decompresses it,
- * returning the resulting uncompressed string. It throws a std::runtime_error if
- * decompression fails at any stage.
- *
- * @param str The compressed input string to decompress.
- * @return std::string The decompressed output string.
- * @throws std::runtime_error If initialization or decompression fails.
- */
-static std::string decompress_string(const std::string& str) {
-    z_stream zs{};
-    if (inflateInit(&zs) != Z_OK)
-        throw std::runtime_error("inflateInit failed");
+    /**
+     * @brief Decompresses a string using the zlib inflate algorithm.
+     *
+     * This function takes a compressed input string (in zlib format) and decompresses it,
+     * returning the resulting uncompressed string. It throws a std::runtime_error if
+     * decompression fails at any stage.
+     *
+     * @param str The compressed input string to decompress.
+     * @return std::string The decompressed output string.
+     * @throws std::runtime_error If initialization or decompression fails.
+     */
+    std::string decompress_string(const std::string& str) {
+        z_stream zs{};
+        if (inflateInit(&zs) != Z_OK)
+            throw std::runtime_error("inflateInit failed");
 
-    zs.next_in = reinterpret_cast<Bytef*>(const_cast<char*>(str.data()));
-    zs.avail_in = static_cast<uInt>(str.size());
+        zs.next_in = reinterpret_cast<Bytef*>(const_cast<char*>(str.data()));
+        zs.avail_in = static_cast<uInt>(str.size());
 
-    std::string outstring;
-    std::vector<char> outbuffer(32768);
+        std::string outstring;
+        std::vector<char> outbuffer(32768);
 
-    int ret;
-    do {
-        zs.next_out = reinterpret_cast<Bytef*>(outbuffer.data());
-        zs.avail_out = static_cast<uInt>(outbuffer.size());
+        int ret;
+        do {
+            zs.next_out = reinterpret_cast<Bytef*>(outbuffer.data());
+            zs.avail_out = static_cast<uInt>(outbuffer.size());
 
-        ret = inflate(&zs, 0);
-        if (ret == Z_STREAM_ERROR || ret == Z_DATA_ERROR || ret == Z_MEM_ERROR) {
-            inflateEnd(&zs);
-            throw std::runtime_error("inflate failed");
-        }
-        outstring.append(outbuffer.data(), outbuffer.size() - zs.avail_out);
-    } while (ret != Z_STREAM_END);
+            ret = inflate(&zs, 0);
+            if (ret == Z_STREAM_ERROR || ret == Z_DATA_ERROR || ret == Z_MEM_ERROR) {
+                inflateEnd(&zs);
+                throw std::runtime_error("inflate failed");
+            }
+            outstring.append(outbuffer.data(), outbuffer.size() - zs.avail_out);
+        } while (ret != Z_STREAM_END);
 
-    inflateEnd(&zs);
-    return outstring;
+        inflateEnd(&zs);
+        return outstring;
+    }
 }
 
 Server::Server(boost::asio::io_context& io_context, short port)

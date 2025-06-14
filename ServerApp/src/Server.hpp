@@ -8,10 +8,6 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/use_awaitable.hpp>
 
-using boost::asio::ip::tcp;
-using boost::asio::awaitable;
-using boost::asio::use_awaitable;
-
 class Server {
 public:
     /**
@@ -51,9 +47,9 @@ private:
      * For each accepted connection, it spawns a new coroutine to handle the client using the provided executor.
      * Any exceptions thrown during the accept loop are caught and logged to standard error.
      *
-     * @return awaitable<void> An awaitable representing the asynchronous operation.
+     * @return boost::asio::awaitable<void> An awaitable representing the asynchronous operation.
      */
-    awaitable<void> listener();
+    boost::asio::awaitable<void> listener();
 
     /**
      * @brief Handles communication with a connected client over a TCP socket.
@@ -73,11 +69,11 @@ private:
      * The function handles client disconnects and logs session events.
      *
      * @param socket The TCP socket representing the client connection.
-     * @return awaitable<void> Coroutine handle for asynchronous execution.
+     * @return boost::asio::awaitable<void> Coroutine handle for asynchronous execution.
      */
-    awaitable<void> handleClient(tcp::socket socket);
+    boost::asio::awaitable<void> handleClient(boost::asio::ip::tcp::socket socket);
 
-    tcp::acceptor acceptor_;
+    boost::asio::ip::tcp::acceptor acceptor_;
     ConfigManager configManager_;
     Stats stats_;
 };
