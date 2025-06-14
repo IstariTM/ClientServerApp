@@ -6,7 +6,6 @@
 #include <nlohmann/json.hpp>
 #include <atomic>
 #include <thread>
-#include <mutex>
 
 class ConfigManager
 {
