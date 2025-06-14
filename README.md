@@ -1,6 +1,6 @@
 # ClientServerApp
 
-Многопоточное асинхронное клиент-серверное приложение на C++ с использованием Boost.Asio (на корутинах), JSON-конфигурацией и юнит-тестами на Boost.Test.
+Многопоточное асинхронное клиент-серверное приложение на C++ с использованием Boost.Asio (на корутинах) и юнит-тестами на Boost.Test.
 
 ---
 
@@ -19,8 +19,8 @@
   
 ### Клиент (Python):
 - Эмуляция параллельной работы нескольких клиентов (количество задаётся параметром запуска).
-- Генерирует 10 000 случайных команд (99% — чтение, 1% — запись).
 - Клиент работает в одном потоке.
+- Генерирует 10 000 случайных команд (99% — чтение, 1% — запись).
 - Поддерживает реконнект при потере соединения.
 
 ---
@@ -29,7 +29,7 @@
 
 ### Сервер
 - Компилятор C++ с поддержкой стандарта C++20 (например, GCC 10+, Clang 11+, MSVC 2019+)
-- [Boost](https://www.boost.org/) (через [vcpkg](https://github.com/microsoft/vcpkg)):
+- [Boost](https://www.boost.org/) (через [vcpkg] для Windows (https://github.com/microsoft/vcpkg)):
   - `boost-system`
   - `boost-asio`
   - `boost-test`
@@ -97,12 +97,12 @@ ctest -C Debug --output-on-failure
 ```
 ClientServerApp/
 ├── ServerApp/
-│   ├── src/                   # Исходники сервера
-│   ├── test/                  # Юнит-тесты на Boost.Test
+│   ├── src/            # Исходники сервера
+│   ├── test/           # Юнит-тесты на Boost.Test
 │   └── CMakeLists.txt
-├── ClientApp/                 # Клиент (Python)
+├── ClientApp/          # Клиент (Python)
 │   └── client.py
-├── CMakeLists.txt             # Главный CMake
+├── CMakeLists.txt      # Главный CMake
 ```
 
 ---
